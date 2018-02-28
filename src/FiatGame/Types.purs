@@ -3,7 +3,6 @@ module FiatGame.Types where
 import Prelude
 
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Except (ExceptT(..), lift, mapExceptT, runExceptT)
 import DOM (DOM)
 import DOM.HTML (window)
@@ -24,7 +23,7 @@ import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
 import Data.URI.AbsoluteURI (Query(..), _query, parse)
 
-type FiatGameQueryParams =
+data FiatGameQueryParams = FiatGameQueryParams
   { webSocketUri :: String
   , userId :: Int 
   }
@@ -37,12 +36,12 @@ getQueryParams href = do
   socket <- note "No socket attribute in querystring" msocket
   (Tuple _ muserId) <- note "No socket attribute in querystring" $ find (\(Tuple h _) -> h == "userId") q
   userId <- note "Can't parse userId" (join (fromString <$> muserId))
-  pure $  
+  pure $ FiatGameQueryParams
     { webSocketUri : socket
     , userId : userId
     }
 
-makeWrapper :: forall e. Eff ( dom :: DOM | e) (Either String (Tuple HTMLElement FiatGameQueryParams))
+makeWrapper :: forall e. Eff ( dom :: DOM | e) (Either String HTMLElement)
 makeWrapper = do
   htmlDoc <- window >>= document
   let doc = htmlDocumentToDocument htmlDoc
@@ -57,5 +56,4 @@ makeWrapper = do
     n <- lift $ do
       wrapper <- createElement "div" doc
       insertBefore (elementToNode wrapper) currScript (elementToNode parEl)
-    el <- mapExceptT (pure <<< bimap show id <<< unwrap) $ readHTMLElement $ toForeign n
-    pure $ Tuple el queryParams
+    mapExceptT (pure <<< bimap show id <<< unwrap) $ readHTMLElement $ toForeign n
