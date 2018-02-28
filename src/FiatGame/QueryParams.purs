@@ -1,4 +1,4 @@
-module FiatGame.Types where
+module FiatGame.QueryParams where
 
 import Prelude
 
@@ -23,12 +23,12 @@ import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
 import Data.URI.AbsoluteURI (Query(..), _query, parse)
 
-data FiatGameQueryParams = FiatGameQueryParams
+data QueryParams = QueryParams
   { webSocketUri :: String
   , userId :: Int 
   }
 
-getQueryParams :: String -> Either String FiatGameQueryParams
+getQueryParams :: String -> Either String QueryParams
 getQueryParams href = do
   parsed <- bimap show id $ parse href
   (Query q) <- note "No querystring in src" $ parsed ^. _query
@@ -36,7 +36,7 @@ getQueryParams href = do
   socket <- note "No socket attribute in querystring" msocket
   (Tuple _ muserId) <- note "No socket attribute in querystring" $ find (\(Tuple h _) -> h == "userId") q
   userId <- note "Can't parse userId" (join (fromString <$> muserId))
-  pure $ FiatGameQueryParams
+  pure $ QueryParams
     { webSocketUri : socket
     , userId : userId
     }
