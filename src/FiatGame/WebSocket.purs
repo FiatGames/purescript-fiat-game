@@ -27,6 +27,7 @@ import Data.Foreign (F, Foreign, readString, toForeign)
 import Data.Generic (class Generic)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
+import Halogen as H
 
 wsProducer
   :: forall eff
@@ -47,17 +48,19 @@ wsProducer socket = CRA.produce \emit ->
   readHelper read =
     either (const Nothing) Just <<< runExcept <<< read <<< toForeign
 
-
-wsConsumer :: forall a m move eff. Monad m 
-  => Generic move 
-  => MonadEff ( exception :: EXCEPTION | eff) m
-  => (move -> m (Maybe a)) -> Consumer String m a
-wsConsumer f = CR.consumer \msg -> do
+wsConsumer :: forall f a m gamestate eff b. Monad m 
+  => Generic gamestate 
+  => MonadEff (exception :: EXCEPTION | eff) m
+  => Discard b 
+  => (f Unit -> m b) -> (gamestate -> Unit -> f Unit) -> Consumer String m a
+wsConsumer query f = CR.consumer \msg -> do
   case jsonParser msg >>= decodeJson of
     Left err -> do
       _ <- liftEff $ throwException $ E.error err
       pure Nothing
-    Right enc -> f enc
+    Right enc -> do
+      query $ H.action $ f enc
+      pure Nothing
 
 wsSender :: forall eff move a m msg. Monad m 
   => MonadEff (dom :: DOM | eff ) m
