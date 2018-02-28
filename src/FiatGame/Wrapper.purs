@@ -1,4 +1,4 @@
-module FiatGame.QueryParams where
+module FiatGame.Wrapper (makeWrapper, QueryParams(..)) where
 
 import Prelude
 
@@ -41,7 +41,7 @@ getQueryParams href = do
     , userId : userId
     }
 
-makeWrapper :: forall e. Eff ( dom :: DOM | e) (Either String HTMLElement)
+makeWrapper :: forall e. Eff ( dom :: DOM | e) (Either String (Tuple HTMLElement QueryParams))
 makeWrapper = do
   htmlDoc <- window >>= document
   let doc = htmlDocumentToDocument htmlDoc
@@ -56,4 +56,5 @@ makeWrapper = do
     n <- lift $ do
       wrapper <- createElement "div" doc
       insertBefore (elementToNode wrapper) currScript (elementToNode parEl)
-    mapExceptT (pure <<< bimap show id <<< unwrap) $ readHTMLElement $ toForeign n
+    el <- mapExceptT (pure <<< bimap show id <<< unwrap) $ readHTMLElement $ toForeign n
+    pure $ Tuple el queryParams
