@@ -2,7 +2,7 @@ module FiatGame.WebSocket where
 
 import Prelude
 
-import Control.Coroutine (Await(..), Consumer)
+import Control.Coroutine (Consumer)
 import Control.Coroutine as CR
 import Control.Coroutine.Aff as CRA
 import Control.Monad.Aff (Aff)
@@ -11,7 +11,6 @@ import Control.Monad.Eff.Class (class MonadEff, liftEff)
 import Control.Monad.Eff.Exception (EXCEPTION, throwException)
 import Control.Monad.Eff.Exception as E
 import Control.Monad.Except (runExcept)
-import Control.Monad.Free.Trans (FreeT)
 import DOM (DOM)
 import DOM.Event.EventTarget as EET
 import DOM.Websocket.Event.EventTypes as WSET
