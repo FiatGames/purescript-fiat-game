@@ -59,17 +59,17 @@ _FiatMove = prism' (\{ a, b } -> FiatMove a b) f
     f (FiatMove a b) = Just $ { a: a, b: b }
 
 --------------------------------------------------------------------------------
-data FiatGameState a b c =
-    FiatGameState a b (Array (FutureMove c))
+data FiatGameState a b =
+    FiatGameState a (Array (FutureMove b))
 
-derive instance genericFiatGameState :: (Generic a, Generic b, Generic c) => Generic (FiatGameState a b c)
+derive instance genericFiatGameState :: (Generic a, Generic b) => Generic (FiatGameState a b)
 
 
 --------------------------------------------------------------------------------
-_FiatGameState :: forall a b c. Prism' (FiatGameState a b c) { a :: a, b :: b, c :: Array (FutureMove c) }
-_FiatGameState = prism' (\{ a, b, c } -> FiatGameState a b c) f
+_FiatGameState :: forall a b. Prism' (FiatGameState a b) { a :: a, b :: Array (FutureMove b) }
+_FiatGameState = prism' (\{ a, b } -> FiatGameState a b) f
   where
-    f (FiatGameState a b c) = Just $ { a: a, b: b, c: c }
+    f (FiatGameState a b) = Just $ { a: a, b: b }
 
 --------------------------------------------------------------------------------
 data FiatMoveError =
