@@ -78,9 +78,9 @@ wsConsumer query f = CR.consumer \msg -> do
 wsSender :: forall eff move a m msg. Monad m 
   => MonadEff (dom :: DOM | eff ) m
   => Generic move 
-  => Int -> WebSocket -> (msg -> move) -> Consumer msg m a
-wsSender userId socket f = CR.consumer \msg -> do
-  liftEff $ WS.sendString socket (stringify $ encodeJson (Tuple userId (f msg)))
+  => WebSocket -> (msg -> move) -> Consumer msg m a
+wsSender socket f = CR.consumer \msg -> do
+  liftEff $ WS.sendString socket $ stringify $ encodeJson $ f msg
   pure Nothing
 
 
