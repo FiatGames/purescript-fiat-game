@@ -13,13 +13,13 @@ import Prelude
 import Data.Generic (class Generic)
 
 data FutureMove a =
-    FutureMove String (FiatMove a)
+    FutureMove String a
 
 derive instance genericFutureMove :: Generic a => Generic (FutureMove a)
 
 
 --------------------------------------------------------------------------------
-_FutureMove :: forall a. Prism' (FutureMove a) { a :: String, b :: FiatMove a }
+_FutureMove :: forall a. Prism' (FutureMove a) { a :: String, b :: a }
 _FutureMove = prism' (\{ a, b } -> FutureMove a b) f
   where
     f (FutureMove a b) = Just $ { a: a, b: b }
@@ -46,17 +46,111 @@ _System = prism' (\_ -> System) f
     f _ = Nothing
 
 --------------------------------------------------------------------------------
-data FiatMove a =
-    FiatMove FiatPlayer a
+data FiatFromClientError =
+    GameIsNotStarted
+  | GameAlreadyStarted
+  | InvalidMove
+  | Unauthorized
+  | NotYourTurn
+  | NotEnoughPlayers
+  | DecodeError String
+  | FailedToInitialize String
 
-derive instance genericFiatMove :: Generic a => Generic (FiatMove a)
+derive instance genericFiatFromClientError :: Generic FiatFromClientError
 
 
 --------------------------------------------------------------------------------
-_FiatMove :: forall a. Prism' (FiatMove a) { a :: FiatPlayer, b :: a }
-_FiatMove = prism' (\{ a, b } -> FiatMove a b) f
+_GameIsNotStarted :: Prism' FiatFromClientError Unit
+_GameIsNotStarted = prism' (\_ -> GameIsNotStarted) f
   where
-    f (FiatMove a b) = Just $ { a: a, b: b }
+    f GameIsNotStarted = Just unit
+    f _ = Nothing
+
+_GameAlreadyStarted :: Prism' FiatFromClientError Unit
+_GameAlreadyStarted = prism' (\_ -> GameAlreadyStarted) f
+  where
+    f GameAlreadyStarted = Just unit
+    f _ = Nothing
+
+_InvalidMove :: Prism' FiatFromClientError Unit
+_InvalidMove = prism' (\_ -> InvalidMove) f
+  where
+    f InvalidMove = Just unit
+    f _ = Nothing
+
+_Unauthorized :: Prism' FiatFromClientError Unit
+_Unauthorized = prism' (\_ -> Unauthorized) f
+  where
+    f Unauthorized = Just unit
+    f _ = Nothing
+
+_NotYourTurn :: Prism' FiatFromClientError Unit
+_NotYourTurn = prism' (\_ -> NotYourTurn) f
+  where
+    f NotYourTurn = Just unit
+    f _ = Nothing
+
+_NotEnoughPlayers :: Prism' FiatFromClientError Unit
+_NotEnoughPlayers = prism' (\_ -> NotEnoughPlayers) f
+  where
+    f NotEnoughPlayers = Just unit
+    f _ = Nothing
+
+_DecodeError :: Prism' FiatFromClientError String
+_DecodeError = prism' DecodeError f
+  where
+    f (DecodeError a) = Just $ a
+    f _ = Nothing
+
+_FailedToInitialize :: Prism' FiatFromClientError String
+_FailedToInitialize = prism' FailedToInitialize f
+  where
+    f (FailedToInitialize a) = Just $ a
+    f _ = Nothing
+
+--------------------------------------------------------------------------------
+data FiatFromClientCmd a b =
+    StartGame
+  | UpdateSettings a
+  | MakeMove b
+
+derive instance genericFiatFromClientCmd :: (Generic a, Generic b) => Generic (FiatFromClientCmd a b)
+
+
+--------------------------------------------------------------------------------
+_StartGame :: forall a b. Prism' (FiatFromClientCmd a b) Unit
+_StartGame = prism' (\_ -> StartGame) f
+  where
+    f StartGame = Just unit
+    f _ = Nothing
+
+_UpdateSettings :: forall a b. Prism' (FiatFromClientCmd a b) a
+_UpdateSettings = prism' UpdateSettings f
+  where
+    f (UpdateSettings a) = Just $ a
+    f _ = Nothing
+
+_MakeMove :: forall a b. Prism' (FiatFromClientCmd a b) b
+_MakeMove = prism' MakeMove f
+  where
+    f (MakeMove a) = Just $ a
+    f _ = Nothing
+
+--------------------------------------------------------------------------------
+newtype FiatFromClient a b =
+    FiatFromClient {
+      fiatFromClientPlayer :: FiatPlayer
+    , fiatFromClientCmd :: FiatFromClientCmd a b
+    }
+
+derive instance genericFiatFromClient :: (Generic a, Generic b) => Generic (FiatFromClient a b)
+
+derive instance newtypeFiatFromClient :: Newtype (FiatFromClient a b) _
+
+
+--------------------------------------------------------------------------------
+_FiatFromClient :: forall a b. Iso' (FiatFromClient a b) { fiatFromClientPlayer :: FiatPlayer, fiatFromClientCmd :: FiatFromClientCmd a b}
+_FiatFromClient = _Newtype
 
 --------------------------------------------------------------------------------
 data FiatGameState a b =
@@ -70,40 +164,5 @@ _FiatGameState :: forall a b. Prism' (FiatGameState a b) { a :: a, b :: Array (F
 _FiatGameState = prism' (\{ a, b } -> FiatGameState a b) f
   where
     f (FiatGameState a b) = Just $ { a: a, b: b }
-
---------------------------------------------------------------------------------
-data FiatMoveError =
-    Invalid
-  | Unauthorized
-  | NotYourTurn
-  | DecodeError String
-
-derive instance genericFiatMoveError :: Generic FiatMoveError
-
-
---------------------------------------------------------------------------------
-_Invalid :: Prism' FiatMoveError Unit
-_Invalid = prism' (\_ -> Invalid) f
-  where
-    f Invalid = Just unit
-    f _ = Nothing
-
-_Unauthorized :: Prism' FiatMoveError Unit
-_Unauthorized = prism' (\_ -> Unauthorized) f
-  where
-    f Unauthorized = Just unit
-    f _ = Nothing
-
-_NotYourTurn :: Prism' FiatMoveError Unit
-_NotYourTurn = prism' (\_ -> NotYourTurn) f
-  where
-    f NotYourTurn = Just unit
-    f _ = Nothing
-
-_DecodeError :: Prism' FiatMoveError String
-_DecodeError = prism' DecodeError f
-  where
-    f (DecodeError a) = Just $ a
-    f _ = Nothing
 
 --------------------------------------------------------------------------------
