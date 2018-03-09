@@ -26,6 +26,7 @@ import Data.Foreign (F, Foreign, readString, toForeign)
 import Data.Generic (class Generic)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
+import FiatGame (FiatFromClient(..), FiatFromClientCmd, FiatPlayer(..))
 import Halogen as H
 import Model (Game(..))
 
@@ -75,12 +76,16 @@ wsConsumer query f = CR.consumer \msg -> do
             query $ H.action $ f $ Tuple (Game game) (Tuple (Just state) settings)
             pure Nothing
 
-wsSender :: forall eff move a m msg. Monad m 
+wsSender :: forall eff settings move a m msg. Monad m 
   => MonadEff (dom :: DOM | eff ) m
   => Generic move 
-  => WebSocket -> (msg -> move) -> Consumer msg m a
-wsSender socket f = CR.consumer \msg -> do
-  liftEff $ WS.sendString socket $ stringify $ encodeJson $ f msg
+  => Generic settings
+  => Int -> WebSocket -> (msg -> FiatFromClientCmd settings move) -> Consumer msg m a
+wsSender userId socket f = CR.consumer \msg -> do
+  liftEff $ WS.sendString socket $ stringify $ encodeJson $ FiatFromClient
+    {  fiatFromClientPlayer: FiatPlayer userId
+    , fiatFromClientCmd: f msg
+    }
   pure Nothing
 
 
