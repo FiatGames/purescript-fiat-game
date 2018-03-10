@@ -26,9 +26,11 @@ import Data.Foreign (F, Foreign, readString, toForeign)
 import Data.Generic (class Generic)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
-import FiatGame (FiatFromClient(..), FiatFromClientCmd, FiatPlayer(..))
+import FiatGame (FiatFromClient(..), FiatFromClientCmd, FiatFromClientError, FiatGameState(..), FiatPlayer(..))
 import Halogen as H
 import Model (Game(..))
+
+type FromWebSocket s g m = Tuple Game (Tuple s (Maybe (Either FiatFromClientError (FiatGameState g m))))
 
 wsProducer
   :: forall eff
@@ -49,12 +51,13 @@ wsProducer socket = CRA.produce \emit ->
   readHelper read =
     either (const Nothing) Just <<< runExcept <<< read <<< toForeign
 
-wsConsumer :: forall f a m state settings g eff b. Monad m 
+wsConsumer :: forall f a m state settings move g eff b. Monad m 
   => Generic state 
   => Generic settings
+  => Generic move
   => MonadEff (exception :: EXCEPTION | eff) m
   => Discard b 
-  => (f Unit -> m b) -> ((Tuple Game (Tuple (Maybe state) settings)) -> Unit -> f Unit) -> Consumer String m a
+  => (f Unit -> m b) -> (FromWebSocket settings state move -> Unit -> f Unit) -> Consumer String m a
 wsConsumer query f = CR.consumer \msg -> do
   case jsonParser msg >>= decodeJson of
     Left err -> do
@@ -66,14 +69,14 @@ wsConsumer query f = CR.consumer \msg -> do
         pure Nothing
       Right settings -> case game.gameState of
         Nothing -> do 
-          query $ H.action $ f $ Tuple (Game game) (Tuple Nothing settings)
+          query $ H.action $ f $ Tuple (Game game) (Tuple settings Nothing)
           pure Nothing
         Just st -> case jsonParser st >>= decodeJson of
           Left err -> do
             _ <- liftEff $ throwException $ E.error err
             pure Nothing
           Right state -> do 
-            query $ H.action $ f $ Tuple (Game game) (Tuple (Just state) settings)
+            query $ H.action $ f $ Tuple (Game game) (Tuple settings (Just state))
             pure Nothing
 
 wsSender :: forall eff settings move a m msg. Monad m 
