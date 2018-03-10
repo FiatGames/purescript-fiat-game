@@ -26,9 +26,11 @@ import Data.Foreign (F, Foreign, readString, toForeign)
 import Data.Generic (class Generic)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
-import FiatGame (FiatFromClient(..), FiatFromClientCmd, FiatFromClientError, FiatGameState(..), FiatPlayer(..), FiatToClient(..))
 import Halogen as H
 import Model (Game(..))
+import FiatGame.GameState
+import FiatGame.ToClient.Types as ToClient
+import FiatGame.ToServer.Types as ToServer
 
 wsProducer
   :: forall eff
@@ -55,7 +57,7 @@ wsConsumer :: forall f a m state settings move g eff b. Monad m
   => Generic move
   => MonadEff (exception :: EXCEPTION | eff) m
   => Discard b 
-  => (f Unit -> m b) -> (FiatToClient settings state move -> Unit -> f Unit) -> Consumer String m a
+  => (f Unit -> m b) -> (ToClient.Msg settings state move -> Unit -> f Unit) -> Consumer String m a
 wsConsumer query f = CR.consumer \msg -> do
   case jsonParser msg >>= decodeJson of
     Left err -> do
@@ -85,11 +87,11 @@ wsSender :: forall eff settings move a m msg. Monad m
   => MonadEff (dom :: DOM | eff ) m
   => Generic move 
   => Generic settings
-  => Int -> WebSocket -> (msg -> FiatFromClientCmd settings move) -> Consumer msg m a
+  => Int -> WebSocket -> (msg -> ToServer.Cmd settings move) -> Consumer msg m a
 wsSender userId socket f = CR.consumer \msg -> do
-  liftEff $ WS.sendString socket $ stringify $ encodeJson $ FiatFromClient
-    {  fiatFromClientPlayer: FiatPlayer userId
-    , fiatFromClientCmd: f msg
+  liftEff $ WS.sendString socket $ stringify $ encodeJson $ ToServer.Msg
+    {  player: FiatPlayer userId
+    , cmd: f msg
     }
   pure Nothing
 
