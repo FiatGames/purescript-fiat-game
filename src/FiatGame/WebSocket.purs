@@ -26,9 +26,9 @@ import Data.Foreign (F, Foreign, readString, toForeign)
 import Data.Generic (class Generic)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
-import FiatGame (FiatFromClient(..), FiatFromClientCmd, FiatFromClientError, FiatGameState(..), FiatPlayer(..))
+import FiatGame (FiatFromClient(..), FiatFromClientCmd, FiatFromClientError, FiatGameState(..), FiatPlayer(..), FiatToClient(..))
 import Halogen as H
-import Model (Game(..), ToClientWebsocket(..))
+import Model (Game(..))
 
 wsProducer
   :: forall eff
@@ -55,7 +55,7 @@ wsConsumer :: forall f a m state settings move g eff b. Monad m
   => Generic move
   => MonadEff (exception :: EXCEPTION | eff) m
   => Discard b 
-  => (f Unit -> m b) -> (ToClientWebsocket settings state move -> Unit -> f Unit) -> Consumer String m a
+  => (f Unit -> m b) -> (FiatToClient settings state move -> Unit -> f Unit) -> Consumer String m a
 wsConsumer query f = CR.consumer \msg -> do
   case jsonParser msg >>= decodeJson of
     Left err -> do
