@@ -28,9 +28,7 @@ import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import FiatGame (FiatFromClient(..), FiatFromClientCmd, FiatFromClientError, FiatGameState(..), FiatPlayer(..))
 import Halogen as H
-import Model (Game(..))
-
-type FromWebSocket s g m = Tuple Game (Tuple s (Maybe (Either FiatFromClientError (FiatGameState g m))))
+import Model (Game(..), ToClientWebsocket(..))
 
 wsProducer
   :: forall eff
@@ -57,27 +55,31 @@ wsConsumer :: forall f a m state settings move g eff b. Monad m
   => Generic move
   => MonadEff (exception :: EXCEPTION | eff) m
   => Discard b 
-  => (f Unit -> m b) -> (FromWebSocket settings state move -> Unit -> f Unit) -> Consumer String m a
+  => (f Unit -> m b) -> (ToClientWebsocket settings state move -> Unit -> f Unit) -> Consumer String m a
 wsConsumer query f = CR.consumer \msg -> do
   case jsonParser msg >>= decodeJson of
     Left err -> do
       _ <- liftEff $ throwException $ E.error err
       pure Nothing
-    Right (Game game) -> case jsonParser game.gameSettings >>= decodeJson of
-      Left err -> do
-        _ <- liftEff $ throwException $ E.error err
-        pure Nothing
-      Right settings -> case game.gameState of
-        Nothing -> do 
-          query $ H.action $ f $ Tuple (Game game) (Tuple settings Nothing)
-          pure Nothing
-        Just st -> case jsonParser st >>= decodeJson of
-          Left err -> do
-            _ <- liftEff $ throwException $ E.error err
-            pure Nothing
-          Right state -> do 
-            query $ H.action $ f $ Tuple (Game game) (Tuple settings (Just state))
-            pure Nothing
+    Right g -> do
+      query $ H.action $ f g
+      pure Nothing
+
+    -- Right (Game game) -> case jsonParser game.gameSettings >>= decodeJson of
+    --   Left err -> do
+    --     _ <- liftEff $ throwException $ E.error err
+    --     pure Nothing
+    --   Right settings -> case game.gameState of
+    --     Nothing -> do 
+    --       query $ H.action $ f $ Tuple (Game game) (Tuple settings Nothing)
+    --       pure Nothing
+    --     Just st -> case jsonParser st >>= decodeJson of
+    --       Left err -> do
+    --         _ <- liftEff $ throwException $ E.error err
+    --         pure Nothing
+    --       Right state -> do 
+    --         query $ H.action $ f $ Tuple (Game game) (Tuple settings (Just state))
+    --         pure Nothing
 
 wsSender :: forall eff settings move a m msg. Monad m 
   => MonadEff (dom :: DOM | eff ) m

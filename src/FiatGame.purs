@@ -4,7 +4,7 @@ module FiatGame where
 import Data.Lens (Iso', Lens', Prism', lens, prism')
 import Data.Lens.Iso.Newtype (_Newtype)
 import Data.Lens.Record (prop)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe, Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
 import Prim (Array, Int, String)
@@ -151,6 +151,30 @@ derive instance newtypeFiatFromClient :: Newtype (FiatFromClient a b) _
 --------------------------------------------------------------------------------
 _FiatFromClient :: forall a b. Iso' (FiatFromClient a b) { fiatFromClientPlayer :: FiatPlayer, fiatFromClientCmd :: FiatFromClientCmd a b}
 _FiatFromClient = _Newtype
+
+--------------------------------------------------------------------------------
+data FiatToClient a b c =
+    FromClientError FiatFromClientError
+  | FiatToClient {
+      fiatToClientSettings :: a
+    , fiatToClientState :: Maybe (FiatGameState b c)
+    }
+
+derive instance genericFiatToClient :: (Generic a, Generic b, Generic c) => Generic (FiatToClient a b c)
+
+
+--------------------------------------------------------------------------------
+_FromClientError :: forall a b c. Prism' (FiatToClient a b c) FiatFromClientError
+_FromClientError = prism' FromClientError f
+  where
+    f (FromClientError a) = Just $ a
+    f _ = Nothing
+
+_FiatToClient :: forall a b c. Prism' (FiatToClient a b c) { fiatToClientSettings :: a, fiatToClientState :: Maybe (FiatGameState b c) }
+_FiatToClient = prism' FiatToClient f
+  where
+    f (FiatToClient r) = Just r
+    f _ = Nothing
 
 --------------------------------------------------------------------------------
 data FiatGameState a b =

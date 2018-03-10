@@ -7,6 +7,7 @@ import Data.Lens.Record (prop)
 import Data.Maybe (Maybe, Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
+import FiatGame (FiatToClient)
 import GameTypeModels.Types (GameStage, GameType)
 import Prim (Int, String)
 
@@ -82,5 +83,26 @@ derive instance newtypeChatMessage :: Newtype ChatMessage _
 --------------------------------------------------------------------------------
 _ChatMessage :: Iso' ChatMessage { chatMessageMessage :: String, chatMessageSent :: String, chatMessageUserId :: Int, chatMessageChatRoomId :: Int}
 _ChatMessage = _Newtype
+
+--------------------------------------------------------------------------------
+data ToClientWebsocket a b c =
+    GameOverview Game
+  | ToClientWebsocket (FiatToClient a b c)
+
+derive instance genericToClientWebsocket :: (Generic a, Generic b, Generic c) => Generic (ToClientWebsocket a b c)
+
+
+--------------------------------------------------------------------------------
+_GameOverview :: forall a b c. Prism' (ToClientWebsocket a b c) Game
+_GameOverview = prism' GameOverview f
+  where
+    f (GameOverview a) = Just $ a
+    f _ = Nothing
+
+_ToClientWebsocket :: forall a b c. Prism' (ToClientWebsocket a b c) (FiatToClient a b c)
+_ToClientWebsocket = prism' ToClientWebsocket f
+  where
+    f (ToClientWebsocket a) = Just $ a
+    f _ = Nothing
 
 --------------------------------------------------------------------------------
