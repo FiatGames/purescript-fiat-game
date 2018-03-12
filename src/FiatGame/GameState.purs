@@ -4,10 +4,10 @@ module FiatGame.GameState where
 import Data.Lens (Iso', Lens', Prism', lens, prism')
 import Data.Lens.Iso.Newtype (_Newtype)
 import Data.Lens.Record (prop)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe, Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
-import Prim (Array, Int, String)
+import Prim (Int, String)
 
 import Prelude
 import Data.Generic (class Generic)
@@ -47,13 +47,13 @@ _System = prism' (\_ -> System) f
 
 --------------------------------------------------------------------------------
 data GameState a b =
-    GameState a (Array (FutureMove b))
+    GameState a (Maybe (FutureMove b))
 
 derive instance genericGameState :: (Generic a, Generic b) => Generic (GameState a b)
 
 
 --------------------------------------------------------------------------------
-_GameState :: forall a b. Prism' (GameState a b) { a :: a, b :: Array (FutureMove b) }
+_GameState :: forall a b. Prism' (GameState a b) { a :: a, b :: Maybe (FutureMove b) }
 _GameState = prism' (\{ a, b } -> GameState a b) f
   where
     f (GameState a b) = Just $ { a: a, b: b }
