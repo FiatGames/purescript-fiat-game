@@ -7,7 +7,8 @@ import Data.Lens.Record (prop)
 import Data.Maybe (Maybe, Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
-import GameTypeModels.Types (GameStage, GameType)
+import FiatGame.GameState (GameStage)
+import GameTypeModels.Types (GameType)
 import Prim (Int, String)
 
 import Prelude

@@ -12,6 +12,34 @@ import Prim (Int, String)
 import Prelude
 import Data.Generic (class Generic)
 
+data GameStage =
+    SettingUp
+  | Playing
+  | Done
+
+derive instance genericGameStage :: Generic GameStage
+
+
+--------------------------------------------------------------------------------
+_SettingUp :: Prism' GameStage Unit
+_SettingUp = prism' (\_ -> SettingUp) f
+  where
+    f SettingUp = Just unit
+    f _ = Nothing
+
+_Playing :: Prism' GameStage Unit
+_Playing = prism' (\_ -> Playing) f
+  where
+    f Playing = Just unit
+    f _ = Nothing
+
+_Done :: Prism' GameStage Unit
+_Done = prism' (\_ -> Done) f
+  where
+    f Done = Just unit
+    f _ = Nothing
+
+--------------------------------------------------------------------------------
 data FutureMove a =
     FutureMove String a
 
@@ -47,15 +75,15 @@ _System = prism' (\_ -> System) f
 
 --------------------------------------------------------------------------------
 data GameState a b =
-    GameState a (Maybe (FutureMove b))
+    GameState GameStage a (Maybe (FutureMove b))
 
 derive instance genericGameState :: (Generic a, Generic b) => Generic (GameState a b)
 
 
 --------------------------------------------------------------------------------
-_GameState :: forall a b. Prism' (GameState a b) { a :: a, b :: Maybe (FutureMove b) }
-_GameState = prism' (\{ a, b } -> GameState a b) f
+_GameState :: forall a b. Prism' (GameState a b) { a :: GameStage, b :: a, c :: Maybe (FutureMove b) }
+_GameState = prism' (\{ a, b, c } -> GameState a b c) f
   where
-    f (GameState a b) = Just $ { a: a, b: b }
+    f (GameState a b c) = Just $ { a: a, b: b, c: c }
 
 --------------------------------------------------------------------------------
