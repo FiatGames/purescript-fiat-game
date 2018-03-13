@@ -8,7 +8,7 @@ import Data.Maybe (Maybe, Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
 import FiatGame.GameState (GameStage)
-import GameTypeModels.Types (GameType)
+import GameTypes.GameType (GameType)
 import Prim (Int, String)
 
 import Prelude

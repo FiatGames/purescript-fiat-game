@@ -25,12 +25,10 @@ import Data.Foldable (for_)
 import Data.Foreign (F, Foreign, readString, toForeign)
 import Data.Generic (class Generic)
 import Data.Maybe (Maybe(..))
-import Data.Tuple (Tuple(..))
-import Halogen as H
-import Model (Game(..))
-import FiatGame.GameState
+import FiatGame.GameState (FiatPlayer(..))
 import FiatGame.ToClient.Types as ToClient
 import FiatGame.ToServer.Types as ToServer
+import Halogen as H
 
 wsProducer
   :: forall eff
@@ -67,22 +65,6 @@ wsConsumer query f = CR.consumer \msg -> do
       query $ H.action $ f g
       pure Nothing
 
-    -- Right (Game game) -> case jsonParser game.gameSettings >>= decodeJson of
-    --   Left err -> do
-    --     _ <- liftEff $ throwException $ E.error err
-    --     pure Nothing
-    --   Right settings -> case game.gameState of
-    --     Nothing -> do 
-    --       query $ H.action $ f $ Tuple (Game game) (Tuple settings Nothing)
-    --       pure Nothing
-    --     Just st -> case jsonParser st >>= decodeJson of
-    --       Left err -> do
-    --         _ <- liftEff $ throwException $ E.error err
-    --         pure Nothing
-    --       Right state -> do 
-    --         query $ H.action $ f $ Tuple (Game game) (Tuple settings (Just state))
-    --         pure Nothing
-
 wsSender :: forall eff settings move a m msg. Monad m 
   => MonadEff (dom :: DOM | eff ) m
   => Generic move 
@@ -90,19 +72,7 @@ wsSender :: forall eff settings move a m msg. Monad m
   => Int -> WebSocket -> (msg -> ToServer.Cmd settings move) -> Consumer msg m a
 wsSender userId socket f = CR.consumer \msg -> do
   liftEff $ WS.sendString socket $ stringify $ encodeJson $ ToServer.Msg
-    {  player: FiatPlayer userId
+    { player: FiatPlayer userId
     , cmd: f msg
     }
   pure Nothing
-
-
-
-
-
-
-
-
-
-
-
-
