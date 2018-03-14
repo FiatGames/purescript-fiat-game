@@ -4,10 +4,10 @@ module FiatGame.ToClient.Types where
 import Data.Lens (Iso', Lens', Prism', lens, prism')
 import Data.Lens.Iso.Newtype (_Newtype)
 import Data.Lens.Record (prop)
-import Data.Maybe (Maybe, Maybe(..))
+import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
-import FiatGame.GameState (GameState)
+import FiatGame.GameState (SettingsAndState)
 import Prim (String)
 
 import Prelude
@@ -78,10 +78,7 @@ _FailedToInitialize = prism' FailedToInitialize f
 --------------------------------------------------------------------------------
 data Msg a b c =
     Error Error
-  | Msg {
-      fiatToClientSettings :: a
-    , fiatToClientState :: Maybe (GameState b c)
-    }
+  | Msg (SettingsAndState a b c)
 
 derive instance genericMsg :: (Generic a, Generic b, Generic c) => Generic (Msg a b c)
 
@@ -93,10 +90,10 @@ _Error = prism' Error f
     f (Error a) = Just $ a
     f _ = Nothing
 
-_Msg :: forall a b c. Prism' (Msg a b c) { fiatToClientSettings :: a, fiatToClientState :: Maybe (GameState b c) }
+_Msg :: forall a b c. Prism' (Msg a b c) (SettingsAndState a b c)
 _Msg = prism' Msg f
   where
-    f (Msg r) = Just r
+    f (Msg a) = Just $ a
     f _ = Nothing
 
 --------------------------------------------------------------------------------

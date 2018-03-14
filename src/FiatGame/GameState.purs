@@ -87,3 +87,16 @@ _GameState = prism' (\{ a, b, c } -> GameState a b c) f
     f (GameState a b c) = Just $ { a: a, b: b, c: c }
 
 --------------------------------------------------------------------------------
+data SettingsAndState a b c =
+    SettingsAndState a (Maybe (GameState b c))
+
+derive instance genericSettingsAndState :: (Generic a, Generic b, Generic c) => Generic (SettingsAndState a b c)
+
+
+--------------------------------------------------------------------------------
+_SettingsAndState :: forall a b c. Prism' (SettingsAndState a b c) { a :: a, b :: Maybe (GameState b c) }
+_SettingsAndState = prism' (\{ a, b } -> SettingsAndState a b) f
+  where
+    f (SettingsAndState a b) = Just $ { a: a, b: b }
+
+--------------------------------------------------------------------------------
