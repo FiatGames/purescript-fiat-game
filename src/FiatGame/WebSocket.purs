@@ -25,7 +25,7 @@ import Data.Foldable (for_)
 import Data.Foreign (F, Foreign, readString, toForeign)
 import Data.Generic (class Generic)
 import Data.Maybe (Maybe(..))
-import FiatGame.GameState (FiatPlayer(..))
+import FiatGame.GameState (Player(..))
 import FiatGame.ToClient.Types as ToClient
 import FiatGame.ToServer.Types as ToServer
 import Halogen as H
@@ -72,7 +72,7 @@ wsSender :: forall eff settings move a m msg. Monad m
   => Int -> WebSocket -> (msg -> ToServer.Cmd settings move) -> Consumer msg m a
 wsSender userId socket f = CR.consumer \msg -> do
   liftEff $ WS.sendString socket $ stringify $ encodeJson $ ToServer.Msg
-    { player: FiatPlayer userId
+    { player: Player userId
     , cmd: f msg
     }
   pure Nothing

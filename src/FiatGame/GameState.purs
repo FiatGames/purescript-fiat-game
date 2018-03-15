@@ -53,21 +53,21 @@ _FutureMove = prism' (\{ a, b } -> FutureMove a b) f
     f (FutureMove a b) = Just $ { a: a, b: b }
 
 --------------------------------------------------------------------------------
-data FiatPlayer =
-    FiatPlayer Int
+data Player =
+    Player Int
   | System
 
-derive instance genericFiatPlayer :: Generic FiatPlayer
+derive instance genericPlayer :: Generic Player
 
 
 --------------------------------------------------------------------------------
-_FiatPlayer :: Prism' FiatPlayer Int
-_FiatPlayer = prism' FiatPlayer f
+_Player :: Prism' Player Int
+_Player = prism' Player f
   where
-    f (FiatPlayer a) = Just $ a
+    f (Player a) = Just $ a
     f _ = Nothing
 
-_System :: Prism' FiatPlayer Unit
+_System :: Prism' Player Unit
 _System = prism' (\_ -> System) f
   where
     f System = Just unit

@@ -7,7 +7,7 @@ import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
-import FiatGame.GameState (FiatPlayer)
+import FiatGame.GameState (Player)
 
 import Prelude
 import Data.Generic (class Generic)
@@ -42,7 +42,7 @@ _MakeMove = prism' MakeMove f
 --------------------------------------------------------------------------------
 newtype Msg a b =
     Msg {
-      player :: FiatPlayer
+      player :: Player
     , cmd :: Cmd a b
     }
 
@@ -52,7 +52,7 @@ derive instance newtypeMsg :: Newtype (Msg a b) _
 
 
 --------------------------------------------------------------------------------
-_Msg :: forall a b. Iso' (Msg a b) { player :: FiatPlayer, cmd :: Cmd a b}
+_Msg :: forall a b. Iso' (Msg a b) { player :: Player, cmd :: Cmd a b}
 _Msg = _Newtype
 
 --------------------------------------------------------------------------------
