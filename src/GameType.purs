@@ -14,7 +14,6 @@ import Data.Generic (class Generic)
 data GameType =
     TicTacToe
   | Tak
-  | NoGame
 
 derive instance genericGameType :: Generic GameType
 
@@ -30,12 +29,6 @@ _Tak :: Prism' GameType Unit
 _Tak = prism' (\_ -> Tak) f
   where
     f Tak = Just unit
-    f _ = Nothing
-
-_NoGame :: Prism' GameType Unit
-_NoGame = prism' (\_ -> NoGame) f
-  where
-    f NoGame = Just unit
     f _ = Nothing
 
 --------------------------------------------------------------------------------

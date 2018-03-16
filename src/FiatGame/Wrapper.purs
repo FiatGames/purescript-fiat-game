@@ -26,6 +26,7 @@ import Data.URI.AbsoluteURI (Query(..), _query, parse)
 data QueryParams = QueryParams
   { webSocketUri :: String
   , userId :: Int 
+  , joinUri :: String
   }
 
 getQueryParams :: String -> Either String QueryParams
@@ -36,9 +37,12 @@ getQueryParams href = do
   socket <- note "No socket attribute in querystring" msocket
   (Tuple _ muserId) <- note "No socket attribute in querystring" $ find (\(Tuple h _) -> h == "userId") q
   userId <- note "Can't parse userId" (join (fromString <$> muserId))
+  (Tuple _ mjoinUri) <- note "No socket attribute in querystring" $ find (\(Tuple h _) -> h == "joinUri") q
+  joinUri <- note "Can't parse joinUri" mjoinUri
   pure $ QueryParams
     { webSocketUri : socket
     , userId : userId
+    , joinUri : joinUri
     }
 
 makeWrapper :: forall e. Eff ( dom :: DOM | e) (Either String (Tuple HTMLElement QueryParams))
