@@ -22,6 +22,7 @@ data Error =
   | NotEnoughPlayers
   | DecodeError String
   | FailedToInitialize String
+  | GameStateOutOfDate
 
 derive instance genericError :: Generic Error
 
@@ -73,6 +74,12 @@ _FailedToInitialize :: Prism' Error String
 _FailedToInitialize = prism' FailedToInitialize f
   where
     f (FailedToInitialize a) = Just $ a
+    f _ = Nothing
+
+_GameStateOutOfDate :: Prism' Error Unit
+_GameStateOutOfDate = prism' (\_ -> GameStateOutOfDate) f
+  where
+    f GameStateOutOfDate = Just unit
     f _ = Nothing
 
 --------------------------------------------------------------------------------
