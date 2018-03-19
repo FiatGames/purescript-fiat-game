@@ -9,13 +9,20 @@ import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
 
 import Prelude
-import Data.Generic (class Generic)
+import Data.Generic (class Generic, gCompare, gEq, gShow)
 
 data GameType =
     TicTacToe
   | Tak
 
 derive instance genericGameType :: Generic GameType
+
+instance showGameType :: Show GameType where
+  show = gShow
+instance eqGameType :: Eq GameType where
+  eq = gEq
+instance ordGameType :: Ord GameType where
+  compare = gCompare
 
 
 --------------------------------------------------------------------------------

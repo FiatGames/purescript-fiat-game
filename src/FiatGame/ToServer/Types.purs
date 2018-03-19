@@ -10,7 +10,7 @@ import Data.Symbol (SProxy(SProxy))
 import FiatGame.GameState (FiatPlayer)
 
 import Prelude
-import Data.Generic (class Generic)
+import Data.Generic (class Generic, gCompare, gEq, gShow)
 
 data Cmd a b =
     StartGame
@@ -18,6 +18,13 @@ data Cmd a b =
   | MakeMove b
 
 derive instance genericCmd :: (Generic a, Generic b) => Generic (Cmd a b)
+
+instance showCmd :: (Generic a, Generic b) => Show (Cmd a b) where
+  show = gShow
+instance eqCmd :: (Generic a, Generic b) => Eq (Cmd a b) where
+  eq = gEq
+instance ordCmd :: (Generic a, Generic b) => Ord (Cmd a b) where
+  compare = gCompare
 
 
 --------------------------------------------------------------------------------
@@ -47,6 +54,13 @@ newtype Msg a b =
     }
 
 derive instance genericMsg :: (Generic a, Generic b) => Generic (Msg a b)
+
+instance showMsg :: (Generic a, Generic b) => Show (Msg a b) where
+  show = gShow
+instance eqMsg :: (Generic a, Generic b) => Eq (Msg a b) where
+  eq = gEq
+instance ordMsg :: (Generic a, Generic b) => Ord (Msg a b) where
+  compare = gCompare
 
 derive instance newtypeMsg :: Newtype (Msg a b) _
 

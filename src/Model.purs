@@ -12,7 +12,7 @@ import GameType (GameType)
 import Prim (Int, String)
 
 import Prelude
-import Data.Generic (class Generic)
+import Data.Generic (class Generic, gCompare, gEq, gShow)
 
 newtype User =
     User {
@@ -21,6 +21,13 @@ newtype User =
     }
 
 derive instance genericUser :: Generic User
+
+instance showUser :: Show User where
+  show = gShow
+instance eqUser :: Eq User where
+  eq = gEq
+instance ordUser :: Ord User where
+  compare = gCompare
 
 derive instance newtypeUser :: Newtype User _
 
@@ -43,6 +50,13 @@ newtype Game =
 
 derive instance genericGame :: Generic Game
 
+instance showGame :: Show Game where
+  show = gShow
+instance eqGame :: Eq Game where
+  eq = gEq
+instance ordGame :: Ord Game where
+  compare = gCompare
+
 derive instance newtypeGame :: Newtype Game _
 
 
@@ -58,6 +72,13 @@ newtype ChatRoom =
     }
 
 derive instance genericChatRoom :: Generic ChatRoom
+
+instance showChatRoom :: Show ChatRoom where
+  show = gShow
+instance eqChatRoom :: Eq ChatRoom where
+  eq = gEq
+instance ordChatRoom :: Ord ChatRoom where
+  compare = gCompare
 
 derive instance newtypeChatRoom :: Newtype ChatRoom _
 
@@ -76,6 +97,13 @@ newtype ChatMessage =
     }
 
 derive instance genericChatMessage :: Generic ChatMessage
+
+instance showChatMessage :: Show ChatMessage where
+  show = gShow
+instance eqChatMessage :: Eq ChatMessage where
+  eq = gEq
+instance ordChatMessage :: Ord ChatMessage where
+  compare = gCompare
 
 derive instance newtypeChatMessage :: Newtype ChatMessage _
 

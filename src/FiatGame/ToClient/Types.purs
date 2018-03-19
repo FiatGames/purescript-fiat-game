@@ -11,7 +11,7 @@ import FiatGame.GameState (FiatPlayer, SettingsAndState)
 import Prim (String)
 
 import Prelude
-import Data.Generic (class Generic)
+import Data.Generic (class Generic, gCompare, gEq, gShow)
 
 data Error =
     GameIsNotStarted
@@ -25,6 +25,13 @@ data Error =
   | GameStateOutOfDate
 
 derive instance genericError :: Generic Error
+
+instance showError :: Show Error where
+  show = gShow
+instance eqError :: Eq Error where
+  eq = gEq
+instance ordError :: Ord Error where
+  compare = gCompare
 
 
 --------------------------------------------------------------------------------
@@ -88,6 +95,13 @@ data Msg a b c =
   | Msg (SettingsAndState a b c)
 
 derive instance genericMsg :: (Generic a, Generic b, Generic c) => Generic (Msg a b c)
+
+instance showMsg :: (Generic a, Generic b, Generic c) => Show (Msg a b c) where
+  show = gShow
+instance eqMsg :: (Generic a, Generic b, Generic c) => Eq (Msg a b c) where
+  eq = gEq
+instance ordMsg :: (Generic a, Generic b, Generic c) => Ord (Msg a b c) where
+  compare = gCompare
 
 
 --------------------------------------------------------------------------------

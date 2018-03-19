@@ -10,7 +10,7 @@ import Data.Symbol (SProxy(SProxy))
 import Prim (Int, String)
 
 import Prelude
-import Data.Generic (class Generic)
+import Data.Generic (class Generic, gCompare, gEq, gShow)
 
 data GameStage =
     SettingUp
@@ -18,6 +18,13 @@ data GameStage =
   | Done
 
 derive instance genericGameStage :: Generic GameStage
+
+instance showGameStage :: Show GameStage where
+  show = gShow
+instance eqGameStage :: Eq GameStage where
+  eq = gEq
+instance ordGameStage :: Ord GameStage where
+  compare = gCompare
 
 
 --------------------------------------------------------------------------------
@@ -45,6 +52,13 @@ data FutureMove a =
 
 derive instance genericFutureMove :: Generic a => Generic (FutureMove a)
 
+instance showFutureMove :: Generic a => Show (FutureMove a) where
+  show = gShow
+instance eqFutureMove :: Generic a => Eq (FutureMove a) where
+  eq = gEq
+instance ordFutureMove :: Generic a => Ord (FutureMove a) where
+  compare = gCompare
+
 
 --------------------------------------------------------------------------------
 _FutureMove :: forall a. Prism' (FutureMove a) { a :: String, b :: a }
@@ -58,6 +72,13 @@ data FiatPlayer =
   | System
 
 derive instance genericFiatPlayer :: Generic FiatPlayer
+
+instance showFiatPlayer :: Show FiatPlayer where
+  show = gShow
+instance eqFiatPlayer :: Eq FiatPlayer where
+  eq = gEq
+instance ordFiatPlayer :: Ord FiatPlayer where
+  compare = gCompare
 
 
 --------------------------------------------------------------------------------
@@ -79,6 +100,13 @@ data GameState a b =
 
 derive instance genericGameState :: (Generic a, Generic b) => Generic (GameState a b)
 
+instance showGameState :: (Generic a, Generic b) => Show (GameState a b) where
+  show = gShow
+instance eqGameState :: (Generic a, Generic b) => Eq (GameState a b) where
+  eq = gEq
+instance ordGameState :: (Generic a, Generic b) => Ord (GameState a b) where
+  compare = gCompare
+
 
 --------------------------------------------------------------------------------
 _GameState :: forall a b. Prism' (GameState a b) { a :: GameStage, b :: a, c :: Maybe (FutureMove b) }
@@ -91,6 +119,13 @@ data SettingsAndState a b c =
     SettingsAndState a (Maybe (GameState b c))
 
 derive instance genericSettingsAndState :: (Generic a, Generic b, Generic c) => Generic (SettingsAndState a b c)
+
+instance showSettingsAndState :: (Generic a, Generic b, Generic c) => Show (SettingsAndState a b c) where
+  show = gShow
+instance eqSettingsAndState :: (Generic a, Generic b, Generic c) => Eq (SettingsAndState a b c) where
+  eq = gEq
+instance ordSettingsAndState :: (Generic a, Generic b, Generic c) => Ord (SettingsAndState a b c) where
+  compare = gCompare
 
 
 --------------------------------------------------------------------------------
