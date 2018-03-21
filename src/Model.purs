@@ -46,6 +46,7 @@ newtype Game =
     , gameSettings :: String
     , gameState :: Maybe String
     , gameUserId :: Int
+    , gameStateHash :: String
     }
 
 derive instance genericGame :: Generic Game
@@ -61,7 +62,7 @@ derive instance newtypeGame :: Newtype Game _
 
 
 --------------------------------------------------------------------------------
-_Game :: Iso' Game { gameName :: String, gameType :: GameType, gameCode :: String, gameStage :: GameStage, gameSettings :: String, gameState :: Maybe String, gameUserId :: Int}
+_Game :: Iso' Game { gameName :: String, gameType :: GameType, gameCode :: String, gameStage :: GameStage, gameSettings :: String, gameState :: Maybe String, gameUserId :: Int, gameStateHash :: String}
 _Game = _Newtype
 
 --------------------------------------------------------------------------------

@@ -7,7 +7,7 @@ import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
-import FiatGame.GameState (FiatPlayer)
+import FiatGame.GameState (FiatGameHash, FiatPlayer)
 
 import Prelude
 import Data.Generic (class Generic, gCompare, gEq, gShow)
@@ -51,6 +51,7 @@ newtype Msg a b =
     Msg {
       player :: FiatPlayer
     , cmd :: Cmd a b
+    , hash :: FiatGameHash
     }
 
 derive instance genericMsg :: (Generic a, Generic b) => Generic (Msg a b)
@@ -66,7 +67,7 @@ derive instance newtypeMsg :: Newtype (Msg a b) _
 
 
 --------------------------------------------------------------------------------
-_Msg :: forall a b. Iso' (Msg a b) { player :: FiatPlayer, cmd :: Cmd a b}
+_Msg :: forall a b. Iso' (Msg a b) { player :: FiatPlayer, cmd :: Cmd a b, hash :: FiatGameHash}
 _Msg = _Newtype
 
 --------------------------------------------------------------------------------

@@ -47,8 +47,12 @@ _Done = prism' (\_ -> Done) f
     f _ = Nothing
 
 --------------------------------------------------------------------------------
-data FutureMove a =
-    FutureMove String a
+newtype FutureMove a =
+    FutureMove {
+      _futureMoveHash :: FiatGameHash
+    , _futureMoveTime :: String
+    , _futureMoveMove :: a
+    }
 
 derive instance genericFutureMove :: Generic a => Generic (FutureMove a)
 
@@ -59,12 +63,21 @@ instance eqFutureMove :: Generic a => Eq (FutureMove a) where
 instance ordFutureMove :: Generic a => Ord (FutureMove a) where
   compare = gCompare
 
+derive instance newtypeFutureMove :: Newtype (FutureMove a) _
+
 
 --------------------------------------------------------------------------------
-_FutureMove :: forall a. Prism' (FutureMove a) { a :: String, b :: a }
-_FutureMove = prism' (\{ a, b } -> FutureMove a b) f
-  where
-    f (FutureMove a b) = Just $ { a: a, b: b }
+_FutureMove :: forall a. Iso' (FutureMove a) { _futureMoveHash :: FiatGameHash, _futureMoveTime :: String, _futureMoveMove :: a}
+_FutureMove = _Newtype
+
+futureMoveHash :: forall a. Lens' (FutureMove a) FiatGameHash
+futureMoveHash = _Newtype <<< prop (SProxy :: SProxy "_futureMoveHash")
+
+futureMoveTime :: forall a. Lens' (FutureMove a) String
+futureMoveTime = _Newtype <<< prop (SProxy :: SProxy "_futureMoveTime")
+
+futureMoveMove :: forall a. Lens' (FutureMove a) a
+futureMoveMove = _Newtype <<< prop (SProxy :: SProxy "_futureMoveMove")
 
 --------------------------------------------------------------------------------
 data FiatPlayer =
@@ -134,4 +147,23 @@ _SettingsAndState = prism' (\{ a, b } -> SettingsAndState a b) f
   where
     f (SettingsAndState a b) = Just $ { a: a, b: b }
 
+--------------------------------------------------------------------------------
+newtype FiatGameHash =
+    FiatGameHash String
+
+derive instance genericFiatGameHash :: Generic FiatGameHash
+
+instance showFiatGameHash :: Show FiatGameHash where
+  show = gShow
+instance eqFiatGameHash :: Eq FiatGameHash where
+  eq = gEq
+instance ordFiatGameHash :: Ord FiatGameHash where
+  compare = gCompare
+
+derive instance newtypeFiatGameHash :: Newtype FiatGameHash _
+
+
+--------------------------------------------------------------------------------
+_FiatGameHash :: Iso' FiatGameHash String
+_FiatGameHash = _Newtype
 --------------------------------------------------------------------------------

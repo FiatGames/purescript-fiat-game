@@ -7,7 +7,7 @@ import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
-import FiatGame.GameState (FiatPlayer, SettingsAndState)
+import FiatGame.GameState (FiatGameHash, FiatPlayer, SettingsAndState)
 import Prim (String)
 
 import Prelude
@@ -92,7 +92,7 @@ _GameStateOutOfDate = prism' (\_ -> GameStateOutOfDate) f
 --------------------------------------------------------------------------------
 data Msg a b c =
     Error FiatPlayer Error
-  | Msg (SettingsAndState a b c)
+  | Msg FiatGameHash (SettingsAndState a b c)
 
 derive instance genericMsg :: (Generic a, Generic b, Generic c) => Generic (Msg a b c)
 
@@ -111,10 +111,10 @@ _Error = prism' (\{ a, b } -> Error a b) f
     f (Error a b) = Just $ { a: a, b: b }
     f _ = Nothing
 
-_Msg :: forall a b c. Prism' (Msg a b c) (SettingsAndState a b c)
-_Msg = prism' Msg f
+_Msg :: forall a b c. Prism' (Msg a b c) { a :: FiatGameHash, b :: SettingsAndState a b c }
+_Msg = prism' (\{ a, b } -> Msg a b) f
   where
-    f (Msg a) = Just $ a
+    f (Msg a b) = Just $ { a: a, b: b }
     f _ = Nothing
 
 --------------------------------------------------------------------------------
