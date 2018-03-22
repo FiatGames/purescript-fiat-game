@@ -49,8 +49,7 @@ _Done = prism' (\_ -> Done) f
 --------------------------------------------------------------------------------
 newtype FutureMove a =
     FutureMove {
-      _futureMoveHash :: FiatGameHash
-    , _futureMoveTime :: String
+      _futureMoveTime :: String
     , _futureMoveMove :: a
     }
 
@@ -67,11 +66,8 @@ derive instance newtypeFutureMove :: Newtype (FutureMove a) _
 
 
 --------------------------------------------------------------------------------
-_FutureMove :: forall a. Iso' (FutureMove a) { _futureMoveHash :: FiatGameHash, _futureMoveTime :: String, _futureMoveMove :: a}
+_FutureMove :: forall a. Iso' (FutureMove a) { _futureMoveTime :: String, _futureMoveMove :: a}
 _FutureMove = _Newtype
-
-futureMoveHash :: forall a. Lens' (FutureMove a) FiatGameHash
-futureMoveHash = _Newtype <<< prop (SProxy :: SProxy "_futureMoveHash")
 
 futureMoveTime :: forall a. Lens' (FutureMove a) String
 futureMoveTime = _Newtype <<< prop (SProxy :: SProxy "_futureMoveTime")
