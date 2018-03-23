@@ -26,7 +26,7 @@ import Data.Foreign (F, Foreign, readString, toForeign)
 import Data.Generic (class Generic)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
-import FiatGame.GameState (FiatGameHash(..), FiatPlayer(..))
+import FiatGame.Types (FiatGameHash(..), FiatPlayer(..))
 import FiatGame.ToClient.Types as ToClient
 import FiatGame.ToServer.Types as ToServer
 import Halogen as H

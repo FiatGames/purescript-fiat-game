@@ -7,7 +7,7 @@ import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
-import FiatGame.GameState (FiatGameHash, FiatPlayer, SettingsAndState)
+import FiatGame.Types (FiatGameHash, FiatPlayer, SettingsAndState)
 import Prim (String)
 
 import Prelude
