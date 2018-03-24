@@ -4,10 +4,10 @@ module FiatGame.ToClient.Types where
 import Data.Lens (Iso', Lens', Prism', lens, prism')
 import Data.Lens.Iso.Newtype (_Newtype)
 import Data.Lens.Record (prop)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe, Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
-import FiatGame.Types (FiatGameHash, FiatPlayer, SettingsAndState)
+import FiatGame.Types (FiatGameHash, FiatPlayer, GameState)
 import Prim (String)
 
 import Prelude
@@ -92,7 +92,7 @@ _GameStateOutOfDate = prism' (\_ -> GameStateOutOfDate) f
 --------------------------------------------------------------------------------
 data Msg a b c =
     Error FiatPlayer Error
-  | Msg FiatGameHash (SettingsAndState a b c)
+  | Msg FiatGameHash a (Maybe (GameState b c))
 
 derive instance genericMsg :: (Generic a, Generic b, Generic c) => Generic (Msg a b c)
 
@@ -111,10 +111,10 @@ _Error = prism' (\{ a, b } -> Error a b) f
     f (Error a b) = Just $ { a: a, b: b }
     f _ = Nothing
 
-_Msg :: forall a b c. Prism' (Msg a b c) { a :: FiatGameHash, b :: SettingsAndState a b c }
-_Msg = prism' (\{ a, b } -> Msg a b) f
+_Msg :: forall a b c. Prism' (Msg a b c) { a :: FiatGameHash, b :: a, c :: Maybe (GameState b c) }
+_Msg = prism' (\{ a, b, c } -> Msg a b c) f
   where
-    f (Msg a b) = Just $ { a: a, b: b }
+    f (Msg a b c) = Just $ { a: a, b: b, c: c }
     f _ = Nothing
 
 --------------------------------------------------------------------------------

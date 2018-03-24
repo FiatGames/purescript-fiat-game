@@ -124,26 +124,6 @@ _GameState = prism' (\{ a, b, c } -> GameState a b c) f
     f (GameState a b c) = Just $ { a: a, b: b, c: c }
 
 --------------------------------------------------------------------------------
-data SettingsAndState a b c =
-    SettingsAndState a (Maybe (GameState b c))
-
-derive instance genericSettingsAndState :: (Generic a, Generic b, Generic c) => Generic (SettingsAndState a b c)
-
-instance showSettingsAndState :: (Generic a, Generic b, Generic c) => Show (SettingsAndState a b c) where
-  show = gShow
-instance eqSettingsAndState :: (Generic a, Generic b, Generic c) => Eq (SettingsAndState a b c) where
-  eq = gEq
-instance ordSettingsAndState :: (Generic a, Generic b, Generic c) => Ord (SettingsAndState a b c) where
-  compare = gCompare
-
-
---------------------------------------------------------------------------------
-_SettingsAndState :: forall a b c. Prism' (SettingsAndState a b c) { a :: a, b :: Maybe (GameState b c) }
-_SettingsAndState = prism' (\{ a, b } -> SettingsAndState a b) f
-  where
-    f (SettingsAndState a b) = Just $ { a: a, b: b }
-
---------------------------------------------------------------------------------
 newtype FiatGameHash =
     FiatGameHash String
 
