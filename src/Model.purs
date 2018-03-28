@@ -9,7 +9,7 @@ import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
 import FiatGame.Types (GameStage)
 import GameType (GameType)
-import Prim (Int, String)
+import Prim (Boolean, Int, String)
 
 import Prelude
 import Data.Generic (class Generic, gCompare, gEq, gShow)
@@ -69,7 +69,8 @@ _Game = _Newtype
 newtype ChatRoom =
     ChatRoom {
       chatRoomName :: String
-    , chatRoomGameId :: Maybe Int
+    , chatRoomGameId :: Int
+    , chatRoomIsGeneral :: Boolean
     }
 
 derive instance genericChatRoom :: Generic ChatRoom
@@ -85,7 +86,7 @@ derive instance newtypeChatRoom :: Newtype ChatRoom _
 
 
 --------------------------------------------------------------------------------
-_ChatRoom :: Iso' ChatRoom { chatRoomName :: String, chatRoomGameId :: Maybe Int}
+_ChatRoom :: Iso' ChatRoom { chatRoomName :: String, chatRoomGameId :: Int, chatRoomIsGeneral :: Boolean}
 _ChatRoom = _Newtype
 
 --------------------------------------------------------------------------------
