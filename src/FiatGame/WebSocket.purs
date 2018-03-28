@@ -30,6 +30,7 @@ import FiatGame.Types (FiatGameHash(..), FiatPlayer(..))
 import FiatGame.ToClient.Types as ToClient
 import FiatGame.ToServer.Types as ToServer
 import Halogen as H
+import Chat.Types as Chat
 
 wsProducer
   :: forall eff
@@ -65,6 +66,26 @@ wsConsumer query f = CR.consumer \msg -> do
     Right g -> do
       query $ H.action $ f g
       pure Nothing
+
+wsChatConsumer :: forall f a m g eff b. Monad m 
+  => MonadEff (exception :: EXCEPTION | eff) m
+  => Discard b 
+  => (f Unit -> m b) -> (Chat.ToClient -> Unit -> f Unit) -> Consumer String m a
+wsChatConsumer query f = CR.consumer \msg -> do
+  case jsonParser msg >>= decodeJson of
+    Left err -> do
+      _ <- liftEff $ throwException $ E.error err
+      pure Nothing
+    Right g -> do
+      query $ H.action $ f g
+      pure Nothing
+
+wsChatSender :: forall eff m msg. Monad m 
+  => MonadEff (dom :: DOM | eff ) m
+  => Int -> WebSocket -> (msg -> Chat.ToServer) -> Consumer msg m Chat.ToServer
+wsChatSender userId socket f = CR.consumer \msg -> do
+  liftEff $ WS.sendString socket $ stringify $ encodeJson $ f msg
+  pure Nothing
 
 wsSender :: forall eff settings move a m msg. Monad m 
   => MonadEff (dom :: DOM | eff ) m
