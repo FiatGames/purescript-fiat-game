@@ -82,13 +82,10 @@ wsChatConsumer query f = CR.consumer \msg -> do
 
 wsChatSender :: forall eff a m msg. Monad m 
   => MonadEff (dom :: DOM | eff ) m
-  => Int -> WebSocket -> (msg -> Chat.ToServerCmd) -> Consumer msg m a
+  => Int -> WebSocket -> (msg -> Chat.ToServer) -> Consumer msg m a
 wsChatSender userId socket f = CR.consumer \msg -> do
   let cmd = f msg
-  liftEff $ WS.sendString socket $ stringify $ encodeJson $ Chat.ToServer
-    { player: FiatPlayer userId
-    , cmd
-    }
+  liftEff $ WS.sendString socket $ stringify $ encodeJson cmd
   pure Nothing
 
 wsSender :: forall eff settings move a m msg. Monad m 
