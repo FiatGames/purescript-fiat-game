@@ -7,14 +7,38 @@ import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
+import FiatGame.Types (FiatPlayer)
 import Model (ChatMessage)
 import Prim (Array, Int, String)
 
 import Prelude
 import Data.Generic (class Generic, gCompare, gEq, gShow)
 
-data ToServer =
+data ToServerCmd =
     PostMessage Int String
+
+derive instance genericToServerCmd :: Generic ToServerCmd
+
+instance showToServerCmd :: Show ToServerCmd where
+  show = gShow
+instance eqToServerCmd :: Eq ToServerCmd where
+  eq = gEq
+instance ordToServerCmd :: Ord ToServerCmd where
+  compare = gCompare
+
+
+--------------------------------------------------------------------------------
+_PostMessage :: Prism' ToServerCmd { a :: Int, b :: String }
+_PostMessage = prism' (\{ a, b } -> PostMessage a b) f
+  where
+    f (PostMessage a b) = Just $ { a: a, b: b }
+
+--------------------------------------------------------------------------------
+newtype ToServer =
+    ToServer {
+      player :: FiatPlayer
+    , cmd :: ToServerCmd
+    }
 
 derive instance genericToServer :: Generic ToServer
 
@@ -25,12 +49,12 @@ instance eqToServer :: Eq ToServer where
 instance ordToServer :: Ord ToServer where
   compare = gCompare
 
+derive instance newtypeToServer :: Newtype ToServer _
+
 
 --------------------------------------------------------------------------------
-_PostMessage :: Prism' ToServer { a :: Int, b :: String }
-_PostMessage = prism' (\{ a, b } -> PostMessage a b) f
-  where
-    f (PostMessage a b) = Just $ { a: a, b: b }
+_ToServer :: Iso' ToServer { player :: FiatPlayer, cmd :: ToServerCmd}
+_ToServer = _Newtype
 
 --------------------------------------------------------------------------------
 newtype ToClient =

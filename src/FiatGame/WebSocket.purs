@@ -51,7 +51,7 @@ wsProducer socket = CRA.produce \emit ->
   readHelper read =
     either (const Nothing) Just <<< runExcept <<< read <<< toForeign
 
-wsConsumer :: forall f a m state settings move g eff b. Monad m 
+wsConsumer :: forall f a m state settings move eff b. Monad m 
   => Generic state 
   => Generic settings
   => Generic move
@@ -67,7 +67,7 @@ wsConsumer query f = CR.consumer \msg -> do
       query $ H.action $ f g
       pure Nothing
 
-wsChatConsumer :: forall f a m g eff b. Monad m 
+wsChatConsumer :: forall f a m eff b. Monad m 
   => MonadEff (exception :: EXCEPTION | eff) m
   => Discard b 
   => (f Unit -> m b) -> (Chat.ToClient -> Unit -> f Unit) -> Consumer String m a
@@ -80,11 +80,15 @@ wsChatConsumer query f = CR.consumer \msg -> do
       query $ H.action $ f g
       pure Nothing
 
-wsChatSender :: forall eff m msg. Monad m 
+wsChatSender :: forall eff a m msg. Monad m 
   => MonadEff (dom :: DOM | eff ) m
-  => Int -> WebSocket -> (msg -> Chat.ToServer) -> Consumer msg m Chat.ToServer
+  => Int -> WebSocket -> (msg -> Chat.ToServerCmd) -> Consumer msg m a
 wsChatSender userId socket f = CR.consumer \msg -> do
-  liftEff $ WS.sendString socket $ stringify $ encodeJson $ f msg
+  let cmd = f msg
+  liftEff $ WS.sendString socket $ stringify $ encodeJson $ Chat.ToServer
+    { player: FiatPlayer userId
+    , cmd
+    }
   pure Nothing
 
 wsSender :: forall eff settings move a m msg. Monad m 
