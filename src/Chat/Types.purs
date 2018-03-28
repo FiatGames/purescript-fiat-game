@@ -58,7 +58,9 @@ _ToServer = _Newtype
 
 --------------------------------------------------------------------------------
 newtype ToClient =
-    Messages (Array ChatMessage)
+    Messages {
+      msgs :: Array ChatMessage
+    }
 
 derive instance genericToClient :: Generic ToClient
 
@@ -73,6 +75,7 @@ derive instance newtypeToClient :: Newtype ToClient _
 
 
 --------------------------------------------------------------------------------
-_Messages :: Iso' ToClient (Array ChatMessage)
+_Messages :: Iso' ToClient { msgs :: Array ChatMessage}
 _Messages = _Newtype
+
 --------------------------------------------------------------------------------
