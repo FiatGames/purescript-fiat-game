@@ -7,7 +7,7 @@ import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
-import Model (ChatMessage, ChatRoom)
+import Model (ChatMessage)
 import Prim (Array, Int, String)
 
 import Prelude
@@ -33,12 +33,9 @@ _PostMessage = prism' (\{ a, b } -> PostMessage a b) f
     f (PostMessage a b) = Just $ { a: a, b: b }
 
 --------------------------------------------------------------------------------
-data ToClient =
+newtype ToClient =
     Messages {
       msgs :: Array ChatMessage
-    }
-  | Rooms {
-      roomsIn :: Array ChatRoom
     }
 
 derive instance genericToClient :: Generic ToClient
@@ -50,18 +47,11 @@ instance eqToClient :: Eq ToClient where
 instance ordToClient :: Ord ToClient where
   compare = gCompare
 
+derive instance newtypeToClient :: Newtype ToClient _
+
 
 --------------------------------------------------------------------------------
-_Messages :: Prism' ToClient { msgs :: Array ChatMessage }
-_Messages = prism' Messages f
-  where
-    f (Messages r) = Just r
-    f _ = Nothing
-
-_Rooms :: Prism' ToClient { roomsIn :: Array ChatRoom }
-_Rooms = prism' Rooms f
-  where
-    f (Rooms r) = Just r
-    f _ = Nothing
+_Messages :: Iso' ToClient { msgs :: Array ChatMessage}
+_Messages = _Newtype
 
 --------------------------------------------------------------------------------
