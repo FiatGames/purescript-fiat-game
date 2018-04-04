@@ -20,6 +20,7 @@ newtype ChatMessageDetail =
     , sentBy :: Player
     , message :: String
     , messageId :: Int
+    , roomId :: Int
     }
 
 derive instance genericChatMessageDetail :: Generic ChatMessageDetail
@@ -35,7 +36,7 @@ derive instance newtypeChatMessageDetail :: Newtype ChatMessageDetail _
 
 
 --------------------------------------------------------------------------------
-_ChatMessageDetail :: Iso' ChatMessageDetail { read :: Boolean, sentOn :: String, sentBy :: Player, message :: String, messageId :: Int}
+_ChatMessageDetail :: Iso' ChatMessageDetail { read :: Boolean, sentOn :: String, sentBy :: Player, message :: String, messageId :: Int, roomId :: Int}
 _ChatMessageDetail = _Newtype
 
 --------------------------------------------------------------------------------
