@@ -25,14 +25,10 @@ import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Data.URI.AbsoluteURI (Query(..), _query, parse)
 
-data QueryParams = QueryParams
-  { webSocketUri :: String
-  , userId :: Int 
-  , joinUri :: String
-  }
+type QueryParams = Map String String
 
-getQueryParams' :: String -> Array String -> Either String (Map String String)
-getQueryParams' href params = do
+getQueryParams :: String -> Array String -> Either String QueryParams
+getQueryParams href params = do
   parsed <- bimap show id $ parse href
   (Query q) <- note "No querystring in src" $ parsed ^. _query
   fromFoldable <$> traverse (getParam q) params
@@ -42,24 +38,8 @@ getQueryParams' href params = do
       value <- note ("No " <> param <> " attribute in querystring") mvalue
       pure $ Tuple param value
 
-getQueryParams :: String -> Either String QueryParams
-getQueryParams href = do
-  parsed <- bimap show id $ parse href
-  (Query q) <- note "No querystring in src" $ parsed ^. _query
-  (Tuple _ msocket) <- note "No socket attribute in querystring" $ find (\(Tuple h _) -> h == "socket") q
-  socket <- note "No socket attribute in querystring" msocket
-  (Tuple _ muserId) <- note "No socket attribute in querystring" $ find (\(Tuple h _) -> h == "userId") q
-  userId <- note "Can't parse userId" (join (fromString <$> muserId))
-  (Tuple _ mjoinUri) <- note "No socket attribute in querystring" $ find (\(Tuple h _) -> h == "joinUri") q
-  joinUri <- note "Can't parse joinUri" mjoinUri
-  pure $ QueryParams
-    { webSocketUri : socket
-    , userId : userId
-    , joinUri : joinUri
-    }
-
-makeWrapper :: forall e. Eff ( dom :: DOM | e) (Either String (Tuple HTMLElement QueryParams))
-makeWrapper = do
+makeWrapper :: forall e. Array String -> Eff ( dom :: DOM | e) (Either String (Tuple HTMLElement QueryParams))
+makeWrapper params = do
   htmlDoc <- window >>= document
   let doc = htmlDocumentToDocument htmlDoc
   scripts <- getElementsByTagName "script" doc
@@ -67,7 +47,7 @@ makeWrapper = do
   runExceptT $ do
     me <- ExceptT $ note "Can't find my script" <$> C.item (l-1) scripts
     src <- ExceptT $ note "Can't find src attribute" <$> getAttribute "src" me
-    queryParams <- ExceptT $ pure $ getQueryParams src
+    queryParams <- ExceptT $ pure $ getQueryParams src params
     let currScript = elementToNode me
     parEl <- ExceptT $ note "Can't find parent element" <$> parentElement currScript
     n <- lift $ do
