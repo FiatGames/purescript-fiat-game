@@ -19,7 +19,9 @@ import Data.Foldable (find)
 import Data.Foreign (toForeign)
 import Data.Int (fromString)
 import Data.Lens ((^.))
+import Data.Map (Map, fromFoldable)
 import Data.Newtype (unwrap)
+import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Data.URI.AbsoluteURI (Query(..), _query, parse)
 
@@ -28,6 +30,17 @@ data QueryParams = QueryParams
   , userId :: Int 
   , joinUri :: String
   }
+
+getQueryParams' :: String -> Array String -> Either String (Map String String)
+getQueryParams' href params = do
+  parsed <- bimap show id $ parse href
+  (Query q) <- note "No querystring in src" $ parsed ^. _query
+  fromFoldable <$> traverse (getParam q) params
+  where 
+    getParam q param = do
+      (Tuple _ mvalue) <- note ("No " <> param <> " attribute in querystring") $ find (\(Tuple h _) -> h == param) q
+      value <- note ("No " <> param <> " attribute in querystring") mvalue
+      pure $ Tuple param value
 
 getQueryParams :: String -> Either String QueryParams
 getQueryParams href = do
