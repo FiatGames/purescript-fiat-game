@@ -104,8 +104,12 @@ _System = prism' (\_ -> System) f
     f _ = Nothing
 
 --------------------------------------------------------------------------------
-data GameState a b =
-    GameState GameStage a (Maybe (FutureMove b))
+newtype GameState a b =
+    GameState {
+      _gameStateStage :: GameStage
+    , _gameStateState :: a
+    , _gameStateFutureMove :: Maybe (FutureMove b)
+    }
 
 derive instance genericGameState :: (Generic a, Generic b) => Generic (GameState a b)
 
@@ -116,12 +120,21 @@ instance eqGameState :: (Generic a, Generic b) => Eq (GameState a b) where
 instance ordGameState :: (Generic a, Generic b) => Ord (GameState a b) where
   compare = gCompare
 
+derive instance newtypeGameState :: Newtype (GameState a b) _
+
 
 --------------------------------------------------------------------------------
-_GameState :: forall a b. Prism' (GameState a b) { a :: GameStage, b :: a, c :: Maybe (FutureMove b) }
-_GameState = prism' (\{ a, b, c } -> GameState a b c) f
-  where
-    f (GameState a b c) = Just $ { a: a, b: b, c: c }
+_GameState :: forall a b. Iso' (GameState a b) { _gameStateStage :: GameStage, _gameStateState :: a, _gameStateFutureMove :: Maybe (FutureMove b)}
+_GameState = _Newtype
+
+gameStateStage :: forall a b. Lens' (GameState a b) GameStage
+gameStateStage = _Newtype <<< prop (SProxy :: SProxy "_gameStateStage")
+
+gameStateState :: forall a b. Lens' (GameState a b) a
+gameStateState = _Newtype <<< prop (SProxy :: SProxy "_gameStateState")
+
+gameStateFutureMove :: forall a b. Lens' (GameState a b) (Maybe (FutureMove b))
+gameStateFutureMove = _Newtype <<< prop (SProxy :: SProxy "_gameStateFutureMove")
 
 --------------------------------------------------------------------------------
 newtype FiatGameHash =

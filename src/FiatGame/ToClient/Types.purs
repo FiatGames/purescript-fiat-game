@@ -91,8 +91,15 @@ _GameStateOutOfDate = prism' (\_ -> GameStateOutOfDate) f
 
 --------------------------------------------------------------------------------
 data Msg a b c =
-    Error FiatPlayer Error
-  | Msg FiatGameHash a (Maybe (GameState b c))
+    Error {
+      player :: FiatPlayer
+    , error :: Error
+    }
+  | Msg {
+      hash :: FiatGameHash
+    , settings :: a
+    , state :: Maybe (GameState b c)
+    }
 
 derive instance genericMsg :: (Generic a, Generic b, Generic c) => Generic (Msg a b c)
 
@@ -105,16 +112,16 @@ instance ordMsg :: (Generic a, Generic b, Generic c) => Ord (Msg a b c) where
 
 
 --------------------------------------------------------------------------------
-_Error :: forall a b c. Prism' (Msg a b c) { a :: FiatPlayer, b :: Error }
-_Error = prism' (\{ a, b } -> Error a b) f
+_Error :: forall a b c. Prism' (Msg a b c) { player :: FiatPlayer, error :: Error }
+_Error = prism' Error f
   where
-    f (Error a b) = Just $ { a: a, b: b }
+    f (Error r) = Just r
     f _ = Nothing
 
-_Msg :: forall a b c. Prism' (Msg a b c) { a :: FiatGameHash, b :: a, c :: Maybe (GameState b c) }
-_Msg = prism' (\{ a, b, c } -> Msg a b c) f
+_Msg :: forall a b c. Prism' (Msg a b c) { hash :: FiatGameHash, settings :: a, state :: Maybe (GameState b c) }
+_Msg = prism' Msg f
   where
-    f (Msg a b c) = Just $ { a: a, b: b, c: c }
+    f (Msg r) = Just r
     f _ = Nothing
 
 --------------------------------------------------------------------------------
